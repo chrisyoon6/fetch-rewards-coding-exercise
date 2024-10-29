@@ -7,11 +7,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
+import kotlinx.serialization.json.Json
 import java.net.URL
 
+/**
+ * Manages the data used in this app
+ */
 class Repository {
-    var _listItems = MutableStateFlow<List<ListItem>>(emptyList())
+
+    private var _listItems = MutableStateFlow<List<ListItem>>(emptyList())
     val listItems = _listItems.asStateFlow()
 
     init {
@@ -36,8 +40,8 @@ class Repository {
      */
     private fun processItems(dataItems: List<ListItem.DataItem>): List<ListItem> {
         val processedItems = mutableListOf<ListItem>()
-        // group items based on the list id
-        dataItems.groupBy { it.listId }.forEach { (listId, dataItems) ->
+        // group items based on the list id and sorted
+        dataItems.groupBy { it.listId }.toSortedMap().forEach { (listId, dataItems) ->
             // add headers to the start of each group showing the corresponding list id
             processedItems.add(ListItem.HeaderItem(listId))
             // then sort the items within this group based on the name, in lexicographical order
@@ -54,19 +58,11 @@ class Repository {
      */
     private suspend fun fetchData(): List<ListItem.DataItem> {
         val jsonStr = withContext(Dispatchers.IO) { URL(ROOT_URL).readText() }
-        val jsonArray = JSONArray(jsonStr)
-        val res = mutableListOf<ListItem.DataItem>()
-        for (i in 0 until jsonArray.length()) {
-            val jsonObj = jsonArray.getJSONObject(i)
-            if (jsonObj.isNull("name") || jsonObj.getString("name").isBlank()) {
-                continue
-            }
-            val id: Int = jsonObj.getInt("id")
-            val listId: Int = jsonObj.getInt("listId")
-            val name: String = jsonObj.getString("name")
-            res.add(ListItem.DataItem(id, listId, name))
-        }
-        return res
+        // replaces null values in "name" with its default value, which is an empty string so it can be filtered accordingly
+        val json = Json {coerceInputValues = true}
+        val res = json.decodeFromString<List<ListItem.DataItem>>(jsonStr)
+        // only have elements with non empty "name"s
+        return res.filter { it.name.isNotBlank() }
     }
 
     companion object {

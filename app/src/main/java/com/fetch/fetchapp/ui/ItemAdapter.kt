@@ -10,6 +10,9 @@ import com.fetch.fetchapp.R
 import com.fetch.fetchapp.data.ListItem
 import java.util.Locale
 
+/**
+ * An adapter to manage the RecyclerView
+ */
 class ItemAdapter(private var items: List<ListItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -61,6 +64,9 @@ class ItemAdapter(private var items: List<ListItem>) : RecyclerView.Adapter<Recy
     }
 }
 
+/**
+ * ViewHolder for header items
+ */
 class HeaderItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private var headerTitle: TextView = itemView.findViewById(R.id.header_title)
 
@@ -72,6 +78,9 @@ class HeaderItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 }
 
+/**
+ * ViewHolder for body/data items
+ */
 class DataItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private var itemName: TextView = itemView.findViewById(R.id.item_name)
     private var itemListId: TextView = itemView.findViewById(R.id.item_listId)
