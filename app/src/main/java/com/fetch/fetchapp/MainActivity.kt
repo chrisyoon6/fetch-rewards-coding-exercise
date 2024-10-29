@@ -18,16 +18,15 @@ class MainActivity : AppCompatActivity() {
 
         val repository = Repository()
         val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
-        //
-        val adapter = ItemAdapter(repository.dataItems.value)
+        val adapter = ItemAdapter(repository.listItems.value)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
         lifecycleScope.launch {
-            repository.dataItems.collectLatest { newDataItems ->
-                // update the RecyclerView with new data items
-                (recyclerView.adapter as ItemAdapter).updateDataset(newDataItems)
+            repository.listItems.collectLatest { newListItems ->
+                // update the RecyclerView with the items
+                (recyclerView.adapter as ItemAdapter).updateDataset(newListItems)
             }
         }
     }
